@@ -4,6 +4,8 @@ const Gettext = imports.gettext.domain('cinnamon-extensions');
 const _ = Gettext.gettext;
 const Util = imports.misc.util;
 const Lang = imports.lang; 
+const GLib = imports.gi.GLib;
+const Gio = imports.gi.Gio;
 
 //applet command constants
 var CommandConstants = new function() {
@@ -29,17 +31,19 @@ MyApplet.prototype = {
 
     _init: function(orientation){
         Applet.IconApplet.prototype._init.call(this, orientation);
-        this.set_applet_icon_name("apacheconf");
+        this.set_applet_icon_symbolic_name("network-server-symbolic");
         this.set_applet_tooltip("WebMenu");
         
         //setup a new menuManager and add the main context main to the manager
+
 		this.menuManager = new PopupMenu.PopupMenuManager(this);
 		this.menu = new Applet.AppletPopupMenu(this, orientation);
 		this.menuManager.addMenu(this.menu);
+
 		
 		//add two Toggle buttons one for Apache and one for mysql
-		this.apacheEnabledSwitch = new PopupMenu.PopupSwitchMenuItem(_("Apache Web Server"), true);
-		this.mysqlEnabledSwitch = new PopupMenu.PopupSwitchMenuItem(_("MySQL Database"), true)
+		this.apacheEnabledSwitch = new PopupMenu.PopupSwitchMenuItem(_("Apache Web Server"), checkService("apache"));
+		this.mysqlEnabledSwitch = new PopupMenu.PopupSwitchMenuItem(_("MySQL Database"), checkService("mysql"))
 		this.menu.addMenuItem(this.apacheEnabledSwitch);
 		this.menu.addMenuItem(this.mysqlEnabledSwitch);
 		
@@ -68,7 +72,7 @@ MyApplet.prototype = {
 		});
 
 
-
+s
 
 		this.apacheEnabledSwitch.connect('toggled', Lang.bind(this, this.onapacheSwitchPressed));
 		this.mysqlEnabledSwitch.connect('toggled', Lang.bind(this, this.onmysqlSwitchPressed));
@@ -90,6 +94,7 @@ MyApplet.prototype = {
     
      onmysqlSwitchPressed: function(item){
 		if(item.state){
+			
 			Util.spawnCommandLine(CommandConstants.COMMAND_START_MYSQL);
 		}
 		
@@ -103,4 +108,24 @@ MyApplet.prototype = {
 function main(metadata, orientation){
     let myApplet = new MyApplet(orientation);
     return myApplet;
+}
+
+function checkService(service) {
+
+	s=GLib.spawn_async_with_pipes(null, ["pgrep",service], null, GLib.SpawnFlags.SEARCH_PATH,null)
+	c=GLib.IOChannel.unix_new(s[3])
+	       
+	let [res, pid, in_fd, out_fd, err_fd] =
+	  GLib.spawn_async_with_pipes(
+	    null, ["pgrep",service], null, GLib.SpawnFlags.SEARCH_PATH, null);
+	out_reader = new Gio.DataInputStream({ base_stream: new Gio.UnixInputStream({fd: out_fd}) });
+	       
+	let [out, size] = out_reader.read_line(null);
+
+	var result = false;
+	if(out != null) {
+		result = true;
+	}
+
+	return result;
 }
