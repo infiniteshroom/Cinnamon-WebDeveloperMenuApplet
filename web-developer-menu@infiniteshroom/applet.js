@@ -15,8 +15,9 @@ var CommandConstants = new function() {
 	this.COMMAND_STOP_MYSQL = "gksu service mysql stop";
 	this.COMMAND_APACHE_CONFIG_EDIT = "gksu gedit /etc/apache2/sites-enabled/000-default";
 	this.COMMAND_PHP_CONFIG_EDIT = "gksu gedit /etc/php5/apache2/php.ini";
-	this.COMMAND_OPEN_PHPMYADMIN = "xdg-open http://localhost/phpmyadmin/";
-	this.COMMAND_OPEN_WEBROOT = "gksu nautilus /var/www/";
+	this.COMMAND_LAUNCH_PHPMYADMIN = "xdg-open http://localhost/phpmyadmin/";
+	this.COMMAND_LAUNCH_WEBDIR = "xdg-open http://localhost/";
+	this.COMMAND_OPEN_WEBDIR = "gksu nemo /var/www/";
 }
 
 
@@ -43,7 +44,7 @@ MyApplet.prototype = {
 		
 		//add two Toggle buttons one for Apache and one for mysql
 		this.apacheEnabledSwitch = new PopupMenu.PopupSwitchMenuItem(_("Apache Web Server"), checkService("apache"));
-		this.mysqlEnabledSwitch = new PopupMenu.PopupSwitchMenuItem(_("MySQL Database"), checkService("mysql"))
+		this.mysqlEnabledSwitch = new PopupMenu.PopupSwitchMenuItem(_("MySQL Server"), checkService("mysql"))
 		this.menu.addMenuItem(this.apacheEnabledSwitch);
 		this.menu.addMenuItem(this.mysqlEnabledSwitch);
 		
@@ -51,15 +52,17 @@ MyApplet.prototype = {
 		this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
 
-		this.menu.addAction(_("Open Web Root"), function(event) {
-						Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_WEBROOT);
-
+		this.menu.addAction(_("Open Web Dir"), function(event) {
+						Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_WEBDIR);
 
 		});
 
-		this.menu.addAction(_("Launch phpMyAdmin"), function(event) {
-						Util.spawnCommandLine(CommandConstants.COMMAND_OPEN_PHPMYADMIN);
+		this.menu.addAction(_("Launch Web Dir"), function(event) {
+						Util.spawnCommandLine(CommandConstants.COMMAND_LAUNCH_WEBDIR);
+		});
 
+		this.menu.addAction(_("Launch phpMyAdmin"), function(event) {
+						Util.spawnCommandLine(CommandConstants.COMMAND_LAUNCH_PHPMYADMIN);
 
 		});
 
@@ -71,8 +74,6 @@ MyApplet.prototype = {
 						Util.spawnCommandLine(CommandConstants.COMMAND_APACHE_CONFIG_EDIT);
 		});
 
-
-s
 
 		this.apacheEnabledSwitch.connect('toggled', Lang.bind(this, this.onapacheSwitchPressed));
 		this.mysqlEnabledSwitch.connect('toggled', Lang.bind(this, this.onmysqlSwitchPressed));
