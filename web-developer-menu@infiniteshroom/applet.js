@@ -17,7 +17,7 @@ var CommandConstants = new function() {
 	this.COMMAND_PHP_CONFIG_EDIT = "gksu gedit /etc/php5/apache2/php.ini";
 	this.COMMAND_LAUNCH_PHPMYADMIN = "xdg-open http://localhost/phpmyadmin/";
 	this.COMMAND_LAUNCH_WEBDIR = "xdg-open http://localhost/";
-	this.COMMAND_OPEN_WEBDIR = "gksu nemo /var/www/";
+	this.COMMAND_OPEN_WEBDIR = "nemo /var/www/";
 }
 
 
@@ -41,7 +41,6 @@ MyApplet.prototype = {
 		this.menu = new Applet.AppletPopupMenu(this, orientation);
 		this.menuManager.addMenu(this.menu);
 
-		
 		//add two Toggle buttons one for Apache and one for mysql
 		this.apacheEnabledSwitch = new PopupMenu.PopupSwitchMenuItem(_("Apache Web Server"), checkService("apache"));
 		this.mysqlEnabledSwitch = new PopupMenu.PopupSwitchMenuItem(_("MySQL Server"), checkService("mysql"))
@@ -74,35 +73,37 @@ MyApplet.prototype = {
 						Util.spawnCommandLine(CommandConstants.COMMAND_APACHE_CONFIG_EDIT);
 		});
 
-
 		this.apacheEnabledSwitch.connect('toggled', Lang.bind(this, this.onapacheSwitchPressed));
 		this.mysqlEnabledSwitch.connect('toggled', Lang.bind(this, this.onmysqlSwitchPressed));
     },
 
 	on_applet_clicked: function(){
 		this.menu.toggle();
+		
+		this.apacheEnabledSwitch.setToggleState(checkService("apache")); //reload state
+		this.mysqlEnabledSwitch.setToggleState(checkService("mysql"));   //reload state
+		
     },
 
     onapacheSwitchPressed: function(item){
+		this.menu.toggle();	//Close before calling gksu	
 		if(item.state){
 			Util.spawnCommandLine(CommandConstants.COMMAND_START_APACHE);
 		}
-		
 		else {
 			Util.spawnCommandLine(CommandConstants.COMMAND_STOP_APACHE);
 		}
     },
     
      onmysqlSwitchPressed: function(item){
+		this.menu.toggle(); //Close before calling gksu
 		if(item.state){
-			
 			Util.spawnCommandLine(CommandConstants.COMMAND_START_MYSQL);
 		}
-		
 		else {
 			Util.spawnCommandLine(CommandConstants.COMMAND_STOP_MYSQL);
 		}
-    },
+    }
 }
 
 
